@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Favoritos da Jul</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ec008c;
+            --primary-light: #ffcce6;
+            --white: #FFFFFF;
+            --dark: #1a1a1a;
+            --gray: #f5f5f5;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--white);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 20px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--primary);
+        }
+
+        .btn {
+            padding: 0.6rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #cc007a;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-delete {
+            background-color: #ff4444;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background-color: #cc0000;
+        }
+
+        .admin-panel {
+            background-color: var(--gray);
+            padding: 2rem;
+            border-radius: 12px;
+        }
+
+        .admin-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .admin-section h3 {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--gray);
+            padding-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--primary-light);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .items-list {
+            margin-top: 1.5rem;
+        }
+
+        .item-row {
+            background-color: var(--gray);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .item-thumb {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @media (min-width: 769px) {
+            #productsList {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .item-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Painel Administrativo</h1>
+            <a href="index.html" class="back-link">← Ver Site</a>
+        </header>
+
+        <div class="admin-panel">
+            <div id="adminAlert"></div>
+
+            <!-- Status do servidor local -->
+            <div id="serverStatus" style="padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 0.85rem; border: 1px solid #ccc; background: #f5f5f5;">
+                ⏳ Verificando servidor local...
+            </div>
+
+            <!-- Botão de Sincronização Simplificado -->
+            <button class="btn" onclick="syncLocalToCloud()" style="background: #e67e22; color: white; width: 100%; margin-bottom: 25px; padding: 15px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer;">
+                💾 Salvar todas as alterações (Sincronizar com a Nuvem)
+            </button>
+
+            <!-- 🛍️ Cadastrar Novo Achadinho -->
+            <div class="admin-section">
+                <h3>🛍️ Cadastrar Novo Achadinho</h3>
+                <div class="form-group">
+                    <label>🔗 Link do Produto (Amazon, Shopee ou Mercado Livre):</label>
+                    <div style="position: relative;">
+                        <input type="text" id="productLink" placeholder="Cole o link da Amazon, Shopee ou Mercado Livre aqui..."
+                            oninput="tryFetchImage()" style="padding-right: 130px;">
+                        <span id="storeBadge" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; display: none;"></span>
+                    </div>
+                    <small style="color: #999; font-size: 0.8rem; margin-top: 4px; display: block;">💡 Cole o link do produto e a imagem será buscada automaticamente</small>
+                </div>
+                <div class="form-group"
+                    style="background: #fff5f8; padding: 15px; border-radius: 12px; border: 2px dashed var(--primary-light); display: flex; flex-direction: column; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div id="imagePreview"
+                            style="width: 100px; height: 100px; border: 2px solid var(--primary-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                            <small style="color: #999; font-size: 0.75rem; text-align: center; padding: 5px;">Aguardando imagem...</small>
+                        </div>
+                        <div style="flex: 1;">
+                            <strong style="color: var(--primary); font-size: 1rem;">Imagem do Achadinho</strong><br>
+                            <p id="imageFetchStatus" style="color: #666; font-size: 0.85rem; margin-top: 4px;">A imagem será capturada do link automaticamente. Se não funcionar, envie um arquivo ou cole a URL manualmente.</p>
+                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <label for="fileUpload" class="btn btn-outline"
+                                    style="padding: 0.5rem 1rem; font-size: 0.8rem; cursor: pointer; margin-bottom: 0;">
+                                    📁 Enviar Arquivo
+                                </label>
+                                <input type="file" id="fileUpload" style="display: none;" accept="image/*"
+                                    onchange="handleFileUpload(this)">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 0.85rem;">URL da Imagem (Manual):</label>
+                        <input type="text" id="productImage" placeholder="https://exemplo.com/imagem.jpg"
+                            oninput="updatePreview()" style="font-size: 0.9rem; padding: 0.6rem;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Nome do Produto:</label>
+                    <input type="text" id="productName" placeholder="Ex: Fone Bluetooth Pro">
+                </div>
+
+                <div class="form-group">
+                    <label>Selecione a Categoria:</label>
+                    <select id="productCategory" style="border-width: 2px; border-color: var(--primary);"></select>
+                </div>
+                <div class="form-group">
+                    <label>Vincular à Publicação do Instagram (Opcional):</label>
+                    <input type="text" id="productIgLink" placeholder="Cole o link da publicação do Instagram aqui..."
+                        style="border-width: 2px; border-color: var(--primary);">
+                </div>
+                <button class="btn btn-primary" onclick="addProduct()"
+                    style="width: 100%; padding: 1rem; font-size: 1.1rem;">✅ Adicionar aos "Todos os Achadinhos"</button>
+            </div>
+
+            <!-- 📸 Publicações Recentes -->
+            <div class="admin-section">
+                <h3>📸 Publicações Recentes (Instagram)</h3>
+
+                <!-- Dica sobre Instagram -->
+                <div style="background: linear-gradient(135deg, #f8f0ff, #e8f4ff); border: 1px solid #c8a0ff; border-radius: 12px; padding: 15px; margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-start;">
+                    <span style="font-size: 1.8rem; flex-shrink: 0;">💡</span>
+                    <div>
+                        <strong style="color: #6a0dad; font-size: 0.95rem;">Como adicionar a foto do Instagram?</strong>
+                        <p style="font-size: 0.82rem; color: #555; margin-top: 5px; line-height: 1.5;">O Instagram não permite que sites externos acessem suas fotos automaticamente (bloqueio de segurança). Por isso, você precisa adicionar a foto manualmente. Veja como:</p>
+                        <ol style="font-size: 0.82rem; color: #555; margin-top: 8px; padding-left: 18px; line-height: 1.8;">
+                            <li>Abra a publicação no Instagram (celular ou PC)</li>
+                            <li>Tire um <strong>print/captura de tela</strong> ou salve a imagem</li>
+                            <li>Clique em <strong>"📁 Enviar Capa"</strong> abaixo e selecione o arquivo</li>
+                        </ol>
+                        <p style="font-size: 0.8rem; color: #888; margin-top: 8px;">📱 No celular: segure a foto → "Salvar" → envie pelo botão abaixo</p>
+                    </div>
+                </div>
+
+                <div class="form-group" style="background: #f0f7ff; padding: 15px; border-radius: 12px; border: 2px dashed #007bff; display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div id="igPreview" style="width: 100px; height: 100px; border: 2px solid #b3d7ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                            <small style="color: #999; font-size: 0.75rem; text-align: center; padding: 5px;">Aguardando capa...</small>
+                        </div>
+                        <div style="flex: 1;">
+                            <strong style="color: #007bff; font-size: 1rem;">📸 Foto da Publicação</strong><br>
+                            <p style="color: #666; font-size: 0.85rem; margin-top: 4px;">Envie uma foto/print da sua publicação do Instagram, ou cole a URL de uma imagem externa.</p>
+                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <label for="igFileUpload" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.8rem; cursor: pointer; color: #007bff; border-color: #007bff; margin-bottom: 0;">
+                                    📁 Enviar Foto/Print
+                                </label>
+                                <input type="file" id="igFileUpload" style="display: none;" accept="image/*" onchange="handleIgFileUpload(this)">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 0.85rem;">URL da Foto (opcional - caso tenha o link direto da imagem):</label>
+                        <input type="text" id="postThumbnail" placeholder="https://exemplo.com/foto.jpg" oninput="updateIgPreview()" style="font-size: 0.9rem; padding: 0.6rem; border-color: #b3d7ff;">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Título da Publicação:</label>
+                    <input type="text" id="postTitle" placeholder="Ex: Look do dia ✨" style="border-width: 2px; border-color: var(--primary-light);">
+                </div>
+                <div class="form-group">
+                    <label>Link do Instagram:</label>
+                    <input type="text" id="postLink" placeholder="https://instagram.com/p/..." oninput="tryFetchIgThumb()" style="border-width: 2px; border-color: var(--primary-light);">
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>🛍️ Selecionar Achadinhos para esta Publicação:</label>
+                    <p style="font-size: 0.8rem; color: #666; margin-bottom: 10px;">Estes produtos aparecerão quando o cliente clicar no post.</p>
+                    <div id="postCreationProductPool" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; max-height: 250px; overflow-y: auto; padding: 10px; border: 1px solid var(--primary-light); border-radius: 8px; background: #fffafc;">
+                        <!-- JS renders pool here -->
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="addInstagramPost()" style="width: 100%; padding: 1rem; font-size: 1.1rem;">+ Adicionar Publicação</button>
+                <div class="items-list" id="postsList"></div>
+            </div>
+
+            <!-- 📁 Gerenciar Categorias -->
+            <div class="admin-section">
+                <h3>📁 Gerenciar Categorias</h3>
+                <div class="form-group" style="display: flex; gap: 10px; align-items: center; margin-bottom: 2rem;">
+                    <input type="text" id="categoryName" placeholder="Ex: Moda, Casa, Beleza..." style="flex: 1; border-color: var(--primary-light); border-width: 2px;">
+                    <button class="btn btn-primary" onclick="addCategory()" style="padding: 0.8rem 2rem;">+ Criar</button>
+                </div>
+                <div class="items-list" id="categoriesList"></div>
+            </div>
+
+            <!-- Modal/Painel: Gerenciador de Categoria -->
+            <div id="categoryManager" class="admin-section" style="display: none; border: 2px solid var(--primary); background: #fffafc;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 id="currentCategoryTitle" style="margin: 0;">Gerenciar Categoria</h3>
+                    <button class="btn btn-outline" onclick="hideCategoryManager()">Fechar</button>
+                </div>
+                <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.5rem;">Selecione os produtos que pertencem a esta categoria:</p>
+                <div id="categoryProductPool" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; max-height: 400px; overflow-y: auto; padding: 15px; border: 2px dashed var(--primary-light); border-radius: 12px; background: white;">
+                    <!-- JS renders pool here -->
+                </div>
+            </div>
+
+            <!-- Modal/Painel: Gerenciador de Post -->
+            <div id="postManager" class="admin-section" style="display: none; border: 2px solid #007bff; background: #f0f7ff;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 id="currentPostTitle" style="margin: 0; color: #007bff;">Vincular Produtos ao Post</h3>
+                    <button class="btn btn-outline" onclick="hidePostManager()" style="color: #007bff; border-color: #007bff;">Fechar</button>
+                </div>
+                <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.5rem;">Clique nos produtos para vincular a esta publicação.</p>
+                <div id="postProductPool" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; max-height: 400px; overflow-y: auto; padding: 15px; border: 2px dashed #b3d7ff; border-radius: 12px; background: white;">
+                    <!-- JS renders pool here -->
+                </div>
+            </div>
+
+            <!-- 🛍️ Todos os Achadinhos Cadastrados -->
+            <div class="admin-section">
+                <h3>🛍️ Todos os Achadinhos Cadastrados</h3>
+                <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.5rem;">Lista completa de produtos que você já cadastrou no sistema.</p>
+                <div class="items-list" id="productsList"></div>
+            </div>
+
+            <!-- Gerenciamento do WhatsApp -->
+            <div class="admin-section" style="margin-top: 3rem; border: 2px solid #25D366; background: #f0fff4;">
+                <h2><span style="font-size: 1.2rem; filter: saturate(1);">🟢</span> Mudar grupo de WhatsApp</h2>
+                <p style="font-size: 0.9rem; color: #666; margin-bottom: 2rem;">Cole aqui o link do seu novo grupo para atualizar automaticamente no site.</p>
+                
+                <div class="form-group">
+                    <label for="whatsappGroupLink" style="color: #128C7E; font-weight: bold;">Link do Grupo de WhatsApp</label>
+                    <input type="text" id="whatsappGroupLink" placeholder="https://chat.whatsapp.com/..." style="width: 100%; padding: 12px; border: 2px solid #25D366; border-radius: 8px;">
+                </div>
+                <button class="btn" onclick="saveWhatsAppConfig()" style="width: 100%; margin-top: 1rem; background-color: #25D366; color: white;">✅ Salvar Novo Grupo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração Proxy (Render substitui acesso direto ao Neon para evitar CORS)
+        const NEON_API_URL = 'https://favoritos-jul-server.onrender.com';
+        const NEON_KEY = 'favoritos_jul_main';
+
+        async function getData() {
+            try {
+                const response = await fetch(`${NEON_API_URL}/get-site-data?key=${NEON_KEY}`);
+                return await response.json();
+            } catch (error) {
+                console.error('Erro ao buscar dados do Proxy:', error);
+                // Fallback para localStorage apenas como emergência
+                return JSON.parse(localStorage.getItem('favoritosJulData') || '{}');
+            }
+        }
+
+        async function saveData(data) {
+            try {
+                // Atualiza localmente primeiro para UI rápida
+                localStorage.setItem('favoritosJulData', JSON.stringify(data));
+                
+                // Salva no Neon via Proxy no Render
+                await fetch(`${NEON_API_URL}/save-site-data`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        key: NEON_KEY,
+                        data: data
+                    })
+                });
+
+                renderAdmin();
+                if (document.getElementById('categoryManager').style.display === 'block') renderCategoryProductPool();
+                if (document.getElementById('postManager').style.display === 'block') renderPostProductPool();
+            } catch (error) {
+                console.error('Erro ao salvar no Proxy:', error);
+                showAlert('Erro ao sincronizar com a nuvem', 'error');
+            }
+        }
+
+        // Função para forçar a sincronização do que está no LocalStorage para a Nuvem
+        async function syncLocalToCloud() {
+            if (!confirm('Isso enviará todos os dados salvos neste computador para a nuvem. Outras pessoas poderão ver suas mudanças. Continuar?')) return;
+            
+            const localData = JSON.parse(localStorage.getItem('favoritosJulData') || '{}');
+            if (Object.keys(localData).length === 0) {
+                return showAlert('Não há dados locais para sincronizar.', 'error');
+            }
+
+            try {
+                showAlert('Sincronizando... por favor aguarde', 'success');
+                await saveData(localData);
+                showAlert('🚀 Dados sincronizados com sucesso! Agora todos conseguem ver suas publicações.', 'success');
+            } catch (error) {
+                showAlert('Erro na sincronização.', 'error');
+            }
+        }
+
+        // Função para inicializar o painel com dados da nuvem
+        async function initAdmin() {
+            const statusEl = document.getElementById('serverStatus');
+            const originalContent = statusEl.innerHTML;
+            statusEl.innerHTML = '⏳ Sincronizando dados com a nuvem...';
+            
+            const data = await getData();
+            // Sobrescreve local se houver dados na nuvem
+            if (Object.keys(data).length > 0) {
+                localStorage.setItem('favoritosJulData', JSON.stringify(data));
+            }
+            
+            statusEl.innerHTML = originalContent;
+            renderAdmin();
+        }
+
+        // Rodar init ao carregar
+        window.addEventListener('DOMContentLoaded', initAdmin);
+
+        function showAlert(msg, type) {
+            const div = document.getElementById('adminAlert');
+            div.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+            setTimeout(() => div.innerHTML = '', 3000);
+        }
+
+        // Categorias
+        async function addCategory() {
+            const name = document.getElementById('categoryName').value.trim();
+            if (!name) return;
+            const data = await getData();
+            if (!data.categories) data.categories = [];
+            data.categories.push({ id: Date.now(), name });
+            document.getElementById('categoryName').value = '';
+            await saveData(data);
+            showAlert('Categoria adicionada!', 'success');
+        }
+
+        async function deleteCategory(id) {
+            if (!confirm('Deseja excluir esta categoria?')) return;
+            const data = await getData();
+            data.categories = data.categories.filter(c => c.id !== id);
+            if (data.products) {
+                data.products.forEach(p => { if (p.categoryId == id) p.categoryId = ""; });
+            }
+            await saveData(data);
+        }
+
+        let selectedCategoryId = null;
+        async function showCategoryManager(id) {
+            const data = await getData();
+            const cat = data.categories.find(c => c.id == id);
+            if (!cat) return;
+            selectedCategoryId = id;
+            document.getElementById('currentCategoryTitle').innerText = `Produtos em: ${cat.name}`;
+            document.getElementById('categoryManager').style.display = 'block';
+            await renderCategoryProductPool();
+            window.scrollTo({ top: document.getElementById('categoryManager').offsetTop - 20, behavior: 'smooth' });
+        }
+
+        function hideCategoryManager() {
+            document.getElementById('categoryManager').style.display = 'none';
+            selectedCategoryId = null;
+        }
+
+        async function renderCategoryProductPool() {
+            const data = await getData();
+            const pool = document.getElementById('categoryProductPool');
+            if (!data.products || data.products.length === 0) {
+                pool.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">Nenhum produto cadastrado.</p>';
+                return;
+            }
+            
+            pool.innerHTML = data.products.map(p => {
+                const isInCategory = p.categoryId == selectedCategoryId;
+                return `
+                    <div onclick="toggleProductInCategory(${p.id})" style="cursor: pointer; padding: 10px; border: 2px solid ${isInCategory ? 'var(--primary)' : 'var(--primary-light)'}; border-radius: 12px; background: ${isInCategory ? 'var(--primary-light)' : 'white'}; text-align: center; transition: all 0.2s; position: relative;">
+                        <img src="${p.imageUrl}" style="width: 100%; height: 60px; object-fit: cover; border-radius: 8px; margin-bottom: 5px;">
+                        <div style="font-size: 0.72rem; font-weight: 600; color: ${isInCategory ? 'var(--primary)' : 'var(--dark)'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${p.name}</div>
+                        ${isInCategory ? '<div style="position: absolute; top: -5px; right: -5px; background: var(--primary); color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; border: 2px solid white;">✓</div>' : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function toggleProductInCategory(id) {
+            const data = await getData();
+            const p = data.products.find(item => item.id == id);
+            if (p) {
+                p.categoryId = (p.categoryId == selectedCategoryId) ? "" : selectedCategoryId;
+                await saveData(data);
+            }
+        }
+
+        // Instagram Posts
+        let selectedProductIdsForPost = [];
+
+        function updateIgPreview() {
+            const url = document.getElementById('postThumbnail').value;
+            const preview = document.getElementById('igPreview');
+            preview.innerHTML = url ? `<img src="${url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<small>Sem Capa</small>';
+        }
+
+        function handleIgFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('postThumbnail').value = e.target.result;
+                updateIgPreview();
+            }
+            reader.readAsDataURL(file);
+        }
+
+        // ─── INSTAGRAM oEmbed: API oficial para posts públicos ─────────────────
+        async function tryFetchIgThumb() {
+            const link = document.getElementById('postLink').value.trim();
+            if (!link.includes('instagram.com')) return;
+
+            const preview = document.getElementById('igPreview');
+            const postThumbInput = document.getElementById('postThumbnail');
+            preview.innerHTML = '<small style="color:#007bff;">⏳ Buscando foto...</small>';
+
+            let thumbUrl = null;
+
+            // Estratégia 1: oEmbed oficial do Instagram (funciona para posts públicos)
+            try {
+                const oembedUrl = `https://api.instagram.com/oembed/?url=${encodeURIComponent(link)}&maxwidth=480`;
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(oembedUrl)}`;
+                const r = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
+                const j = await r.json();
+                const data = JSON.parse(j.contents);
+                if (data && data.thumbnail_url) {
+                    thumbUrl = data.thumbnail_url;
+                }
+            } catch { }
+
+            // Estratégia 2: Microlink.io (funciona bem para Instagram)
+            if (!thumbUrl) {
+                try {
+                    const r = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(link)}`, { signal: AbortSignal.timeout(12000) });
+                    const j = await r.json();
+                    thumbUrl = j?.data?.image?.url || j?.data?.screenshot?.url || null;
+                } catch { }
+            }
+
+            // Estratégia 3: Scraping via proxy (fallback)
+            if (!thumbUrl) {
+                try {
+                    const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(link)}`, { signal: AbortSignal.timeout(8000) });
+                    const j = await r.json();
+                    const m = j.contents?.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
+                        || j.contents?.match(/content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+                    if (m && m[1] && m[1].startsWith('http')) thumbUrl = m[1];
+                } catch { }
+            }
+
+            if (thumbUrl) {
+                postThumbInput.value = thumbUrl;
+                updateIgPreview();
+                preview.style.border = '2px solid #28a745';
+            } else {
+                preview.innerHTML = '<div style="font-size:1.5rem;">📵</div><small style="color:#999;font-size:0.65rem;text-align:center;padding:5px;">Foto não capturada<br>Envie manualmente</small>';
+            }
+        }
+
+        async function renderPostCreationProductPool() {
+            const data = await getData();
+            const pool = document.getElementById('postCreationProductPool');
+            if (!data.products) return pool.innerHTML = '<p>Nenhum produto cadastrado.</p>';
+            pool.innerHTML = data.products.map(p => {
+                const isSelected = selectedProductIdsForPost.includes(p.id);
+                return `
+                    <div onclick="toggleProductForNewPost(${p.id})" style="cursor: pointer; padding: 10px; border: 2px solid ${isSelected ? 'var(--primary)' : 'var(--primary-light)'}; border-radius: 12px; background: ${isSelected ? 'var(--primary-light)' : 'white'}; text-align: center; position: relative;">
+                        <img src="${p.imageUrl}" style="width: 100%; height: 50px; object-fit: cover; border-radius: 8px; margin-bottom: 5px;">
+                        <div style="font-size: 0.65rem; font-weight: 600;">${p.name}</div>
+                        ${isSelected ? '<div style="position: absolute; top: -5px; right: -5px; background: var(--primary); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 0.6rem; display: flex; align-items: center; justify-content: center;">✓</div>' : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleProductForNewPost(id) {
+            const idx = selectedProductIdsForPost.indexOf(id);
+            if (idx > -1) selectedProductIdsForPost.splice(idx, 1);
+            else selectedProductIdsForPost.push(id);
+            renderPostCreationProductPool();
+        }
+
+        async function addInstagramPost() {
+            const title = document.getElementById('postTitle').value.trim();
+            const link = document.getElementById('postLink').value.trim();
+            const thumb = document.getElementById('postThumbnail').value;
+            if (!title || !link) return showAlert('Título e link obrigatórios!', 'error');
+
+            const data = await getData();
+            let postId;
+
+            if (editingPostId) {
+                postId = editingPostId;
+                const post = data.instagramPosts.find(p => p.id == postId);
+                if (post) {
+                    post.title = title;
+                    post.videoThumbnailUrl = thumb || '📸';
+                    post.instagramLink = link;
+                }
+                editingPostId = null;
+                document.querySelector('button[onclick="addInstagramPost()"]').innerHTML = '+ Adicionar Publicação';
+                showAlert('Publicação atualizada!', 'success');
+            } else {
+                postId = Date.now();
+                if (!data.instagramPosts) data.instagramPosts = [];
+                data.instagramPosts.push({ id: postId, title, videoThumbnailUrl: thumb || '📸', instagramLink: link });
+                showAlert('Publicação adicionada!', 'success');
+            }
+
+            // Atualiza produtos vinculados
+            if (data.products) {
+                data.products.forEach(p => {
+                    if (selectedProductIdsForPost.includes(p.id)) {
+                        p.postId = postId;
+                    } else if (p.postId == postId) {
+                        // Se o produto estava no post mas foi desmarcado na edição
+                        p.postId = null;
+                    }
+                });
+            }
+
+            document.getElementById('postTitle').value = '';
+            document.getElementById('postLink').value = '';
+            document.getElementById('postThumbnail').value = '';
+            document.getElementById('igPreview').innerHTML = '<small>Aguardando capa...</small>';
+            selectedProductIdsForPost = [];
+            await saveData(data);
+        }
+
+        async function loadPostToForm(id) {
+            const data = await getData();
+            const post = data.instagramPosts.find(p => p.id == id);
+            if (!post) return;
+
+            editingPostId = id;
+            document.getElementById('postTitle').value = post.title;
+            document.getElementById('postLink').value = post.instagramLink;
+            document.getElementById('postThumbnail').value = post.videoThumbnailUrl;
+            
+            // Carrega produtos vinculados
+            selectedProductIdsForPost = data.products
+                .filter(p => p.postId == id)
+                .map(p => p.id);
+            
+            updateIgPreview();
+            renderPostCreationProductPool();
+            
+            document.querySelector('button[onclick="addInstagramPost()"]').innerHTML = '💾 Salvar Alterações';
+            window.scrollTo({ top: document.getElementById('igFileUpload').offsetTop - 100, behavior: 'smooth' });
+        }
+
+        async function deletePost(id) {
+            if (!confirm('Excluir publicação?')) return;
+            const data = await getData();
+            data.instagramPosts = data.instagramPosts.filter(p => p.id !== id);
+            if (data.products) {
+                data.products.forEach(p => { if (p.postId == id) p.postId = null; });
+            }
+            await saveData(data);
+        }
+
+        let selectedPostId = null;
+        async function showPostManager(id) {
+            const data = await getData();
+            const post = data.instagramPosts.find(p => p.id == id);
+            if (!post) return;
+            selectedPostId = id;
+            document.getElementById('currentPostTitle').innerText = `Vincular a: ${post.title}`;
+            document.getElementById('postManager').style.display = 'block';
+            await renderPostProductPool();
+            window.scrollTo({ top: document.getElementById('postManager').offsetTop - 20, behavior: 'smooth' });
+        }
+
+        function hidePostManager() {
+            document.getElementById('postManager').style.display = 'none';
+            selectedPostId = null;
+        }
+
+        async function renderPostProductPool() {
+            const data = await getData();
+            const pool = document.getElementById('postProductPool');
+            pool.innerHTML = (data.products || []).map(p => {
+                const isInPost = p.postId == selectedPostId;
+                return `
+                    <div onclick="toggleProductInPost(${p.id})" style="cursor: pointer; padding: 10px; border: 2px solid ${isInPost ? '#007bff' : '#b3d7ff'}; border-radius: 12px; background: ${isInPost ? '#e1f0ff' : 'white'}; text-align: center; position: relative;">
+                        <img src="${p.imageUrl}" style="width: 100%; height: 60px; object-fit: cover; border-radius: 8px;">
+                        <div style="font-size: 0.7rem; font-weight: 600; margin-top: 5px;">${p.name}</div>
+                        ${isInPost ? '<div style="position: absolute; top: -5px; right: -5px; background: #007bff; color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; border: 2px solid white;">✓</div>' : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function toggleProductInPost(id) {
+            const data = await getData();
+            const p = data.products.find(item => item.id == id);
+            if (p) {
+                p.postId = (p.postId == selectedPostId) ? null : selectedPostId;
+                await saveData(data);
+            }
+        }
+
+        // Image Preview Logic
+        function updatePreview() {
+            const url = document.getElementById('productImage').value;
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = url ? `<img src="${url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<small>Sem Imagem</small>';
+        }
+
+        function handleFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('productImage').value = e.target.result;
+                updatePreview();
+            }
+            reader.readAsDataURL(file);
+        }
+
+        const LOCAL_SERVER = 'https://favoritos-jul-server.onrender.com';
+        let serverOnline = false;
+
+        // Verifica se o servidor local está rodando
+        async function checkServer() {
+            try {
+                const r = await fetch(`${LOCAL_SERVER}/health`, { signal: AbortSignal.timeout(1500) });
+                const j = await r.json();
+                serverOnline = j.status === 'ok';
+            } catch { serverOnline = false; }
+            updateServerStatus();
+        }
+
+        function updateServerStatus() {
+            const el = document.getElementById('serverStatus');
+            if (!el) return;
+            if (serverOnline) {
+                el.innerHTML = '🟢 <strong>Servidor de imagens ativo</strong> — Captura automática de fotos liberada!';
+                el.style.background = '#d4f5e2';
+                el.style.borderColor = '#28a745';
+                el.style.color = '#155724';
+            } else {
+                el.innerHTML = '🔴 <strong>Servidor de imagens em hibernação</strong> — Aguarde 30s ou <a href="https://favoritos-jul-server.onrender.com/health" target="_blank" style="color:#721c24;">clique aqui para acordar</a>';
+                el.style.background = '#f8d7da';
+                el.style.borderColor = '#f5c6cb';
+                el.style.color = '#721c24';
+            }
+        }
+
+        function showServerInstructions() {
+            window.open('https://favoritos-jul-server.onrender.com/health', '_blank');
+            return false;
+        }
+
+        // Detecta qual marketplace é o link
+        function detectStore(link) {
+            if (/amazon\.(com\.br|com)/i.test(link)) return { name: 'Amazon', color: '#FF9900', bg: '#fff8ee', label: '🟠 Amazon' };
+            if (/shopee\.com\.br/i.test(link) || /shp\.ee/i.test(link) || /s\.shopee/i.test(link)) return { name: 'Shopee', color: '#EE4D2D', bg: '#fff2ef', label: '🔴 Shopee' };
+            if (/mercadolivre\.com\.br/i.test(link) || /mercadolibre\.com/i.test(link) || /mlb\./i.test(link)) return { name: 'Mercado Livre', color: '#FFE600', bg: '#fffde0', textColor: '#333', label: '🟡 Mercado Livre' };
+            return null;
+        }
+
+        function setImageSuccess(url, status, source) {
+            document.getElementById('productImage').value = url;
+            updatePreview();
+            status.textContent = `✅ Imagem capturada via ${source || 'automático'}!`;
+            status.style.color = '#28a745';
+        }
+
+        function setImageFail(preview, status) {
+            preview.innerHTML = '<div style="font-size:2rem;">🖼️</div><small style="color:#999;font-size:0.7rem;">Não capturada</small>';
+            status.innerHTML = '⚠️ Não foi possível capturar. <strong>Envie um arquivo</strong> ou <strong>cole a URL</strong> manualmente.';
+            status.style.color = '#e67e22';
+        }
+
+        // ─── MÉTODO 1: Servidor local (mais confiável) ─────────────────────────
+        async function fetchViaLocalServer(link) {
+            if (!serverOnline) return null;
+            try {
+                const r = await fetch(`${LOCAL_SERVER}/fetch-image?url=${encodeURIComponent(link)}`, { signal: AbortSignal.timeout(20000) });
+                const j = await r.json();
+                return j.success ? { url: j.imageUrl, source: `servidor local (${j.source})` } : null;
+            } catch { return null; }
+        }
+
+        // ─── MÉTODO 2: Mercado Livre API direta (sem proxy) ───────────────────
+        async function fetchMercadoLivre(link) {
+            try {
+                // URLs tipo /p/MLB... são página de produto (comparador) - usa API /products/
+                const isProductPage = /\/p\/(MLB\d+)/i.test(link);
+                if (isProductPage) {
+                    const productId = link.match(/\/p\/(MLB\d+)/i)[1];
+                    // Busca os itens do produto e pega a imagem do primeiro
+                    const r = await fetch(`https://api.mercadolibre.com/products/${productId}/items?status=active&limit=1`, { signal: AbortSignal.timeout(8000) });
+                    if (r.ok) {
+                        const d = await r.json();
+                        const firstItem = d.results && d.results[0];
+                        if (firstItem) {
+                            const r2 = await fetch(`https://api.mercadolibre.com/items/${firstItem}`, { signal: AbortSignal.timeout(8000) });
+                            if (r2.ok) {
+                                const item = await r2.json();
+                                const pic = item.pictures && item.pictures[0];
+                                if (pic) return pic.secure_url || pic.url;
+                            }
+                        }
+                    }
+                    // Fallback: tenta thumbnail do produto
+                    const rp = await fetch(`https://api.mercadolibre.com/products/${productId}`, { signal: AbortSignal.timeout(8000) });
+                    if (rp.ok) {
+                        const dp = await rp.json();
+                        const thumb = dp.pictures && dp.pictures[0];
+                        return thumb ? (thumb.secure_url || thumb.url) : null;
+                    }
+                    return null;
+                }
+
+                // URL normal com item ID direto (MLB123456789)
+                const match = link.match(/MLB[_\-]?(\d+)/i);
+                if (!match) return null;
+                const itemId = 'MLB' + match[1];
+                const r = await fetch(`https://api.mercadolibre.com/items/${itemId}`, { signal: AbortSignal.timeout(8000) });
+                if (!r.ok) return null;
+                const d = await r.json();
+                const pic = d.pictures && d.pictures[0];
+                return pic ? (pic.secure_url || pic.url) : null;
+            } catch { return null; }
+        }
+
+        // ─── MÉTODO 3: Shopee via proxy ────────────────────────────────────────
+        async function fetchShopee(link) {
+            let shopId = null, itemId = null;
+            const qsShop = link.match(/[?&]shopid=(\d+)/i);
+            const qsItem = link.match(/[?&]itemid=(\d+)/i);
+            if (qsShop && qsItem) { shopId = qsShop[1]; itemId = qsItem[1]; }
+            else {
+                const m = link.match(/[.-]i\.(\d+)\.(\d+)/i);
+                if (m) { shopId = m[1]; itemId = m[2]; }
+            }
+            if (!shopId || !itemId) return null;
+            try {
+                const apiUrl = `https://shopee.com.br/api/v4/item/get?itemid=${itemId}&shopid=${shopId}`;
+                const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+                const r = await fetch(proxy, { signal: AbortSignal.timeout(10000) });
+                const j = await r.json();
+                const data = JSON.parse(j.contents);
+                const imgHash = data?.data?.image || (data?.data?.images && data.data.images[0]);
+                if (imgHash) return `https://down-br.img.susercontent.com/file/${imgHash}`;
+            } catch { }
+            return null;
+        }
+
+        // ─── MÉTODO 4: Microlink (profissional) ───────────────────────────────
+        async function fetchMicrolink(link) {
+            try {
+                const r = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(link)}&screenshot=false`, { signal: AbortSignal.timeout(12000) });
+                if (!r.ok) return null;
+                const j = await r.json();
+                return j?.data?.image?.url || null;
+            } catch { return null; }
+        }
+
+        // ─── MÉTODO 5: Proxy genérico og:image ────────────────────────────────
+        async function fetchViaProxy(link) {
+            const proxies = [
+                (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+                (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+            ];
+            const ogPatterns = [
+                /property=["']og:image["']\s+content=["']([^"']+)["']/i,
+                /content=["']([^"']+)["']\s+property=["']og:image["']/i,
+                /<meta[^>]+og:image[^>]+content=["']([^"']+)["']/i,
+            ];
+            for (let i = 0; i < proxies.length; i++) {
+                try {
+                    const r = await fetch(proxies[i](link), { signal: AbortSignal.timeout(8000) });
+                    let html = i === 0 ? (await r.json()).contents : await r.text();
+                    for (const rx of ogPatterns) {
+                        const m = html.match(rx);
+                        if (m && m[1] && m[1].startsWith('http')) return m[1];
+                    }
+                } catch { }
+            }
+            return null;
+        }
+
+        let fetchTimer = null;
+        async function tryFetchImage() {
+            clearTimeout(fetchTimer);
+            fetchTimer = setTimeout(async () => {
+                const link = document.getElementById('productLink').value.trim();
+                if (!link.startsWith('http')) return;
+
+                const store = detectStore(link);
+                const badge = document.getElementById('storeBadge');
+                const statusEl = document.getElementById('imageFetchStatus');
+                const preview = document.getElementById('imagePreview');
+
+                if (store) {
+                    badge.textContent = store.label;
+                    badge.style.background = store.bg || store.color;
+                    badge.style.color = store.textColor || store.color;
+                    badge.style.border = `1px solid ${store.color}`;
+                    badge.style.display = 'inline-block';
+                } else { badge.style.display = 'none'; }
+
+                preview.innerHTML = '<small style="color:#ec008c;">⏳ Buscando imagem...</small>';
+                statusEl.style.color = '#ec008c';
+
+                let imgUrl = null;
+                let source = '';
+
+                // 1️⃣ Servidor local (melhor opção)
+                if (serverOnline) {
+                    statusEl.textContent = '⏳ Consultando servidor local...';
+                    const result = await fetchViaLocalServer(link);
+                    if (result) { imgUrl = result.url; source = result.source; }
+                }
+
+                // 2️⃣ Mercado Livre API direta
+                if (!imgUrl && store?.name === 'Mercado Livre') {
+                    statusEl.textContent = '⏳ API do Mercado Livre...';
+                    imgUrl = await fetchMercadoLivre(link);
+                    source = 'Mercado Livre API';
+                }
+
+                // 3️⃣ Shopee via proxy
+                if (!imgUrl && store?.name === 'Shopee') {
+                    statusEl.textContent = '⏳ API da Shopee...';
+                    imgUrl = await fetchShopee(link);
+                    source = 'Shopee API';
+                }
+
+                // 4️⃣ Microlink (Amazon + genérico)
+                if (!imgUrl) {
+                    statusEl.textContent = '⏳ Microlink...';
+                    imgUrl = await fetchMicrolink(link);
+                    source = 'Microlink';
+                }
+
+                // 5️⃣ Proxy genérico
+                if (!imgUrl) {
+                    statusEl.textContent = '⏳ Proxy genérico...';
+                    imgUrl = await fetchViaProxy(link);
+                    source = 'proxy';
+                }
+
+                if (imgUrl) {
+                    setImageSuccess(imgUrl, statusEl, source);
+                } else {
+                    setImageFail(preview, statusEl);
+                }
+            }, 700);
+        }
+
+
+        // Add Product
+
+        let editingProductId = null;
+        let editingPostId = null;
+
+        async function addProduct() {
+            const name = document.getElementById('productName').value.trim();
+            const img = document.getElementById('productImage').value.trim();
+            const link = document.getElementById('productLink').value.trim();
+            const catId = document.getElementById('productCategory').value;
+            const igLink = document.getElementById('productIgLink').value.trim();
+
+            if (!name || !img || !link) return showAlert('Preencha os campos obrigatórios!', 'error');
+
+            const data = await getData();
+            if (!data.products) data.products = [];
+
+            if (editingProductId) {
+                const p = data.products.find(item => item.id == editingProductId);
+                if (p) {
+                    p.name = name;
+                    p.imageUrl = img;
+                    p.shopeeLink = link;
+                    p.categoryId = catId;
+                    p.instagramLink = igLink;
+                }
+                editingProductId = null;
+                document.querySelector('button[onclick="addProduct()"]').innerHTML = '✅ Adicionar aos "Todos os Achadinhos"';
+                showAlert('Produto atualizado!', 'success');
+            } else {
+                data.products.push({ id: Date.now(), name, imageUrl: img, shopeeLink: link, categoryId: catId, instagramLink: igLink });
+                showAlert('Produto adicionado!', 'success');
+            }
+            
+            // Reset form
+            document.getElementById('productName').value = '';
+            document.getElementById('productImage').value = '';
+            document.getElementById('productLink').value = '';
+            document.getElementById('productIgLink').value = '';
+            updatePreview();
+            await saveData(data);
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('Excluir produto?')) return;
+            const data = await getData();
+            data.products = data.products.filter(p => p.id !== id);
+            await saveData(data);
+        }
+
+        async function loadProductToForm(id) {
+            const data = await getData();
+            const p = data.products.find(item => item.id == id);
+            if (!p) return;
+            editingProductId = id;
+            document.getElementById('productName').value = p.name;
+            document.getElementById('productImage').value = p.imageUrl;
+            document.getElementById('productLink').value = p.shopeeLink;
+            document.getElementById('productCategory').value = p.categoryId;
+            document.getElementById('productIgLink').value = p.instagramLink || '';
+            document.querySelector('button[onclick="addProduct()"]').innerHTML = '✅ Salvar Alterações';
+            updatePreview();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Rendering Admin
+        async function renderAdmin() {
+            const data = await getData();
+            
+            // Select de Categorias
+            const catSelect = document.getElementById('productCategory');
+            catSelect.innerHTML = '<option value="">Selecione uma categoria</option>' + (data.categories || []).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+            // Pool no Cadastro de Posts
+            renderPostCreationProductPool();
+
+            // Lista de Categorias
+            document.getElementById('categoriesList').innerHTML = (data.categories || []).map(c => `
+                <div class="item-row">
+                    <span>${c.name}</span>
+                    <div style="display: flex; gap: 5px;">
+                        <button class="btn btn-outline" onclick="showCategoryManager(${c.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">⚙️ Gerenciar</button>
+                        <button class="btn btn-delete" onclick="deleteCategory(${c.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Excluir</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Lista de Posts
+            document.getElementById('postsList').innerHTML = (data.instagramPosts || []).map(p => `
+                <div class="item-row">
+                    <div class="item-info">
+                        <img class="item-thumb" src="${p.videoThumbnailUrl}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;">
+                        <span>${p.title}</span>
+                    </div>
+                    <div style="display: flex; gap: 5px;">
+                        <button class="btn btn-outline" onclick="loadPostToForm(${p.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">📝 Editar</button>
+                        <button class="btn btn-outline" onclick="showPostManager(${p.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">🔗 Vincular</button>
+                        <button class="btn btn-delete" onclick="deletePost(${p.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Excluir</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Lista de Produtos
+            document.getElementById('productsList').innerHTML = (data.products || []).map(p => {
+                const catName = (data.categories || []).find(c => c.id == p.categoryId)?.name || 'Sem Categoria';
+                return `
+                    <div class="item-row" style="flex-direction: column; align-items: stretch; gap: 10px; border: 1px solid var(--primary-light);">
+                        <div class="item-info">
+                            <img src="${p.imageUrl}" style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover;">
+                            <div style="flex: 1;">
+                                <strong style="color: var(--primary);">${p.name}</strong><br>
+                                <small>Categoria: ${catName}</small>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="btn btn-outline" onclick="loadProductToForm(${p.id})" style="flex: 1; padding: 0.4rem; font-size: 0.8rem;">📝 Editar</button>
+                            <button class="btn btn-delete" onclick="deleteProduct(${p.id})" style="flex: 1; padding: 0.4rem; font-size: 0.8rem;">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Carregar link do WhatsApp no campo
+            const waLink = data.whatsappLink || 'https://chat.whatsapp.com/BTKMPz3n4GfBJuDaFkW9pC?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGntI6-INKsuECMPeGJLF1GTdiHiwwO222nmxby4vQ3FYe0gKsevGJgGgFpBSo_aem_uRL5Lsk59DB7pp2O-DWGJg';
+            const waInput = document.getElementById('whatsappGroupLink');
+            if (waInput && !waInput.value) { // Só preenche se estiver vazio para não apagar enquanto digita
+                waInput.value = waLink;
+            }
+        }
+
+        async function saveWhatsAppConfig() {
+            const link = document.getElementById('whatsappGroupLink').value.trim();
+            if (!link) return showAlert('Insira um link válido!', 'error');
+            
+            const data = await getData();
+            data.whatsappLink = link;
+            await saveData(data); // Isso já salva no localStorage e no Neon
+            showAlert('Link do WhatsApp atualizado com sucesso! 🟢✨', 'success');
+        }
+
+        window.onload = function() {
+            // renderAdmin já é chamado pelo DOMContentLoaded -> initAdmin
+            checkServer();
+            setInterval(checkServer, 10000);
+        };
+    </script>
+</body>
+
+</html>

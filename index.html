@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favoritos da Jul - Achadinhos da Shopee</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ec008c;
+            --primary-light: #ffcce6;
+            --white: #FFFFFF;
+            --dark: #1a1a1a;
+            --gray: #f5f5f5;
+        }
+
+        html {
+            background-color: #f5f5f5; /* Fundo fora da área do app */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, var(--white) 0%, var(--primary-light) 100%);
+            background-attachment: fixed; /* Mantém o degradê fixo ao rolar */
+            color: var(--dark);
+            line-height: 1.6;
+            max-width: 480px; /* Força tamanho mobile sempre */
+            margin: 0 auto;
+            min-height: 100vh;
+            box-shadow: 0 0 25px rgba(0,0,0,0.1);
+            overflow-x: hidden;
+            padding-bottom: 3rem; /* Espaço de segurança para o rodapé */
+        }
+
+        .container {
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--white) 0%, var(--primary-light) 50%, #ffe0f0 100%);
+            border-bottom: 2px solid rgba(236, 0, 140, 0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(236, 0, 140, 0.15);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px 15px;
+            width: 100%;
+            min-height: 90px;
+            position: relative;
+        }
+
+        .logo-section img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--white);
+            box-shadow: 0 0 12px rgba(236, 0, 140, 0.3);
+            background-color: var(--white);
+            flex-shrink: 0;
+        }
+
+        .brand-name {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            flex-grow: 1;
+            min-width: 0;
+            margin-left: -40px; /* Desloca o texto para a esquerda para centralizar melhor na tela total */
+        }
+
+        .brand-name span {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            white-space: normal; /* Permite quebra se for MUITO pequeno, melhor que cortar */
+            line-height: 1.2;
+        }
+
+        .brand-subtitle {
+            font-size: 0.75rem;
+            color: #ff66b2;
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+            margin-top: 4px;
+            line-height: 1.2;
+            white-space: normal;
+        }
+
+        .btn {
+            padding: 0.6rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #cc007a;
+            transform: translateY(-2px);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin: 1.5rem 0;
+            background: linear-gradient(to right, #ffcfe6, #ffecf5); /* Degradê começando da esquerda */
+            border-radius: 12px;
+            padding: 4px;
+            border: 1px solid rgba(236, 0, 140, 0.1);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.6rem 0.2rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+        }
+
+        .tab-btn.active {
+            background-color: white;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-btn:hover {
+            opacity: 0.8;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Grid de Produtos */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 10px; 
+            margin: 1rem 0;
+        }
+
+        .product-card {
+            background: #ffcfe6; /* Rosa suave idêntico ao fundo da imagem */
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(236, 0, 140, 0.1);
+            box-shadow: 0 4px 15px rgba(236, 0, 140, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 35px rgba(236, 0, 140, 0.5), 0 0 20px rgba(236, 0, 140, 0.35);
+            border-color: rgba(236, 0, 140, 0.5);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 160px; /* Imagem menor para 2 colunas */
+            background-color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .product-image .placeholder {
+            font-size: 3rem;
+            color: white;
+        }
+
+        .product-info {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .card-buttons-wrapper {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-top: 8px;
+        }
+
+        .product-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--dark);
+            font-size: 0.85rem;
+        }
+
+        .product-desc {
+            font-size: 0.85rem;
+            color: #ff66b2;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .product-link {
+            display: block;
+            text-align: center;
+            background-color: var(--primary);
+            color: white;
+            padding: 0.6rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.8rem;
+            gap: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .product-link:hover {
+            background-color: #cc007a;
+        }
+        
+        .product-link svg {
+            width: 14px!important;
+            height: 14px!important;
+        }
+
+        .social-icon {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--primary); /* Rosa intenso */
+            color: white; /* Ícone branco */
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+
+        .social-icon:hover {
+            transform: scale(1.1) translateY(-3px);
+            background-color: #cc007a; /* Rosa mais escuro no hover */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .store-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-bottom: 6px;
+        }
+
+        /* Search */
+        .search-box {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 2px solid var(--primary-light);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Categories */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .category-btn {
+            padding: 1rem;
+            background-color: var(--white);
+            color: var(--dark);
+            border: 1px solid rgba(236, 0, 140, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(236, 0, 140, 0.2), 0 0 5px rgba(236, 0, 140, 0.1);
+        }
+
+        .category-btn:hover {
+            transform: translateY(-3px);
+            background-color: var(--primary-light);
+            color: var(--dark);
+            box-shadow: 0 5px 20px rgba(236, 0, 140, 0.4), 0 0 15px rgba(236, 0, 140, 0.2);
+            border-color: rgba(236, 0, 140, 0.5);
+        }
+
+        .category-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 5px 25px rgba(236, 0, 140, 0.6), 0 0 15px rgba(236, 0, 140, 0.4);
+            transform: translateY(-3px);
+        }
+
+        /* Post Products View */
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background-color: var(--gray);
+            border-radius: 12px;
+        }
+
+        .post-header img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 3px solid var(--primary); /* Borda rosa intenso */
+            box-shadow: 0 0 10px rgba(236, 0, 140, 0.2);
+        }
+
+        .post-header-content h2 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--primary);
+            color: white;
+            padding: 2rem 2rem 3rem 2rem; /* Aumentei o espaço inferior */
+            text-align: center;
+            margin-top: 3rem;
+            width: 100%;
+        }
+
+        /* Desktop and Responsive overwrites removed because standard is 100% mobile */
+        .tab-content h2 { text-align: center; font-size: 1.4rem; padding: 0 10px; }
+        .tab-content p { text-align: center; font-size: 0.9rem; }
+        .logo-section h1 { font-size: 1.4rem; }
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #999;
+            font-size: 1.1rem;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div style="width: 100%; padding: 0;">
+            <div class="header-content">
+                <div class="logo-section">
+                    <img src="629475690_17879980815465177_7943399356356373468_n.jpg" alt="Favoritos da Jul">
+                    <div class="brand-name">
+                        <span>✨Favoritos da Jul✨</span>
+                        <div class="brand-subtitle">Achadinhos reais e promoções todos os dias 🌸</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('recent')">Publicações Recentes</button>
+            <button class="tab-btn" onclick="switchTab('all')">Todos os Achadinhos</button>
+            <button class="tab-btn" onclick="switchTab('category')">Buscar por Categoria</button>
+        </div>
+
+        <div id="recent" class="tab-content active">
+            <div id="postListView">
+                <h2 style="color: var(--primary); margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-size: 1.1rem; overflow: hidden; text-overflow: ellipsis;">
+                    💖 Publicações Recentes do Instagram 💖
+                </h2>
+                <p style="color: #ff66b2; margin-bottom: 2rem;">Confira os achadinhos que postei no Instagram 👇</p>
+                <div id="instagramGrid" class="products-grid"></div>
+            </div>
+            <div id="postDetailView" class="hidden">
+                <div class="back-btn" onclick="hidePostProducts()">← Voltar às publicações</div>
+                <div id="postHeaderContainer"></div>
+                <div id="postProductsGrid" class="products-grid"></div>
+            </div>
+        </div>
+
+        <div id="all" class="tab-content">
+            <h2 style="color: var(--primary); margin-bottom: 1rem;">Todos os Achadinhos</h2>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Buscar produtos..." onkeyup="filterProducts()">
+                <button class="btn btn-primary">🔍</button>
+            </div>
+            <div id="productsGrid" class="products-grid"></div>
+        </div>
+
+        <div id="category" class="tab-content">
+            <h2 style="color: var(--primary); margin-bottom: 1rem;">Buscar Achadinhos por Categoria</h2>
+            <p style="color: #ff66b2; margin-bottom: 2rem;">Selecione uma categoria para ver os produtos</p>
+            <div id="categoriesGrid" class="categories-grid"></div>
+            <div id="categoryProducts" class="products-grid" style="margin-top: 2rem;"></div>
+        </div>
+    </main>
+
+    <footer>
+        <p>Favoritos da Jul - Encontre os melhores produtos</p>
+        <div style="display: flex; gap: 20px; justify-content: center; margin-top: 20px;">
+            <!-- TikTok -->
+            <a href="https://www.tiktok.com/@favoritosdajul?_r=1&_t=ZS-94tsk5dWKE4" target="_blank" class="social-icon">
+                <svg viewBox="0 0 448 512" width="20" height="20" fill="currentColor" style="stroke: none;">
+                    <path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/>
+                </svg>
+            </a>
+            <!-- Instagram -->
+            <a href="https://www.instagram.com/favoritosdajul?igsh=cDRhMTJjYTA5YWp0" target="_blank" class="social-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+            </a>
+            <!-- Facebook -->
+            <a href="https://www.facebook.com/share/1BUfsvv1BE/?mibextid=wwXIfr" target="_blank" class="social-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                </svg>
+            </a>
+            <!-- WhatsApp -->
+            <a href="https://chat.whatsapp.com/BTKMPz3n4GfBJuDaFkW9pC?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGntI6-INKsuECMPeGJLF1GTdiHiwwO222nmxby4vQ3FYe0gKsevGJgGgFpBSo_aem_uRL5Lsk59DB7pp2O-DWGJg" target="_blank" class="social-icon" id="whatsappLink">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" stroke="none">
+                    <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.539 2.016 2.041-.54c.942.512 1.954.893 3.247.893 3.181 0 5.767-2.586 5.768-5.766 0-3.18-2.587-5.766-5.768-5.766zM15.48 14.281c-.131.369-.769.704-1.066.749-.297.045-.595.076-1.74-.374-1.464-.574-2.408-2.071-2.482-2.17-.074-.099-.607-.807-.607-1.538 0-.731.385-1.091.52-1.241.135-.15.297-.188.396-.188.099 0 .198.001.284.006.091.004.213-.035.333.254.12.289.412 1.004.448 1.077.036.073.06.158.01.258-.049.1-.112.164-.188.252-.075.088-.158.196-.226.262-.075.073-.153.153-.066.303.087.15.388.641.832 1.037.571.509 1.052.667 1.201.742.15.075.237.062.325-.039.088-.101.378-.44.478-.59.1-.15.2-.125.337-.075.138.05 1.014.504 1.189.591.175.087.291.13.334.204.043.073.043.424-.088.793z"></path>
+                </svg>
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        // Configuração Proxy (Render substitui acesso direto ao Neon para evitar CORS)
+        const NEON_API_URL = 'https://favoritos-jul-server.onrender.com';
+        const NEON_KEY = 'favoritos_jul_main';
+
+        async function getData() {
+            try {
+                // Chama o proxy no Render em vez do Neon direto
+                const response = await fetch(`${NEON_API_URL}/get-site-data?key=${NEON_KEY}`);
+                const data = await response.json();
+                // Cache local para rapidez
+                if (Object.keys(data).length > 0) {
+                    localStorage.setItem('favoritosJulData', JSON.stringify(data));
+                }
+                return data;
+            } catch (error) {
+                console.error('Erro ao buscar dados do Neon:', error);
+                return JSON.parse(localStorage.getItem('favoritosJulData') || '{}');
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'all') renderProducts();
+            if (tabName === 'recent') {
+                hidePostProducts();
+                renderInstagramPosts();
+            }
+            if (tabName === 'category') renderCategories();
+        }
+
+        let currentPostId = null;
+
+        async function renderInstagramPosts() {
+            const data = await getData();
+            const grid = document.getElementById('instagramGrid');
+            const posts = data.instagramPosts || [];
+            
+            if (posts.length === 0) {
+                grid.innerHTML = '<div class="empty-state">Nenhuma publicação adicionada ainda</div>';
+                return;
+            }
+
+            grid.innerHTML = posts.map(post => `
+                <div class="product-card" onclick="showPostProducts(${post.id})">
+                    <div class="product-image">
+                        ${post.videoThumbnailUrl.startsWith('http') ? `<img src="${post.videoThumbnailUrl}" alt="${post.title}">` : `<div class="placeholder">${post.videoThumbnailUrl}</div>`}
+                    </div>
+                    <div class="product-info">
+                        <div class="product-name">${post.title}</div>
+                        <div class="card-buttons-wrapper">
+                            <div class="product-link" style="margin: 0;">📦 Ver Produtos do Vídeo</div>
+                            <a href="${post.instagramLink}" target="_blank" class="product-link" style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="event.stopPropagation()">
+                                <svg style="width: 18px; height: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                                Ver no Instagram
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function showPostProducts(postId) {
+            currentPostId = postId;
+            const data = await getData();
+            const post = data.instagramPosts.find(p => p.id === postId);
+            if (!post) return;
+
+            document.getElementById('postListView').classList.add('hidden');
+            document.getElementById('postDetailView').classList.remove('hidden');
+
+            const headerContainer = document.getElementById('postHeaderContainer');
+            headerContainer.innerHTML = `
+                <div class="post-header">
+                    ${post.videoThumbnailUrl.startsWith('http') ? `<img src="${post.videoThumbnailUrl}" alt="${post.title}">` : `<div style="width:100px; height:100px; background:var(--primary-light); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:2rem;">${post.videoThumbnailUrl}</div>`}
+                    <div class="post-header-content">
+                        <h2>${post.title}</h2>
+                        <a href="${post.instagramLink}" target="_blank" style="color:var(--primary); font-size:0.9rem; text-decoration:none; font-weight:600; margin-top:0.5rem; display:block;">Ver vídeo no Instagram →</a>
+                    </div>
+                </div>
+            `;
+
+            const grid = document.getElementById('postProductsGrid');
+            const products = (data.products || []).filter(p => 
+                p.postId == postId || 
+                (p.instagramLink && post.instagramLink && p.instagramLink.trim() === post.instagramLink.trim())
+            );
+
+            if (products.length === 0) {
+                grid.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;">Nenhum produto vinculado a esta publicação ainda.</div>';
+                return;
+            }
+
+            grid.innerHTML = products.map(product => renderProductCardHTML(product, data)).join('');
+        }
+
+        function hidePostProducts() {
+            currentPostId = null;
+            document.getElementById('postListView').classList.remove('hidden');
+            document.getElementById('postDetailView').classList.add('hidden');
+        }
+
+        function updateWhatsAppLink() {
+            const data = getData();
+            // Pega o link salvo ou usa um padrão se estiver vazio
+            const waLink = data.whatsappLink || 'https://chat.whatsapp.com/BTKMPz3n4GfBJuDaFkW9pC?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGntI6-INKsuECMPeGJLF1GTdiHiwwO222nmxby4vQ3FYe0gKsevGJgGgFpBSo_aem_uRL5Lsk59DB7pp2O-DWGJg';
+            const el = document.getElementById('whatsappLink');
+            if (el) {
+                el.href = waLink;
+                console.log('Link do WhatsApp atualizado:', waLink);
+            }
+        }
+
+        async function renderProducts() {
+            const data = await getData();
+            const grid = document.getElementById('productsGrid');
+            const products = data.products || [];
+            
+            if (products.length === 0) {
+                grid.innerHTML = '<div class="empty-state">Nenhum produto adicionado ainda</div>';
+                return;
+            }
+
+            grid.innerHTML = products.map(product => renderProductCardHTML(product, data)).join('');
+        }
+
+        async function renderCategories() {
+            currentCategoryId = null;
+            document.getElementById('categoryProducts').innerHTML = '';
+            
+            const data = await getData();
+            const grid = document.getElementById('categoriesGrid');
+            const cats = data.categories || [];
+            
+            if (cats.length === 0) {
+                grid.innerHTML = '<div class="empty-state">Nenhuma categoria adicionada</div>';
+                return;
+            }
+
+            grid.innerHTML = cats.map(cat => `
+                <button class="category-btn" onclick="filterByCategory(${cat.id})">${cat.name}</button>
+            `).join('');
+        }
+
+        let currentCategoryId = null;
+
+        async function filterByCategory(categoryId) {
+            const btn = event ? (event.currentTarget || event.target) : null;
+            const grid = document.getElementById('categoryProducts');
+
+            if (currentCategoryId === categoryId) {
+                currentCategoryId = null;
+                if (btn) btn.classList.remove('active');
+                grid.innerHTML = '';
+                return;
+            }
+
+            currentCategoryId = categoryId;
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            const data = await getData();
+            const products = (data.products || []).filter(p => p.categoryId == categoryId);
+
+            if (products.length === 0) {
+                grid.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;">Nenhum produto nesta categoria</div>';
+                return;
+            }
+
+            grid.innerHTML = products.map(product => renderProductCardHTML(product, data)).join('');
+        }
+
+        async function filterProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const data = await getData();
+            const products = (data.products || []).filter(p =>
+                p.name.toLowerCase().includes(searchTerm)
+            );
+            const grid = document.getElementById('productsGrid');
+
+            if (products.length === 0) {
+                grid.innerHTML = '<div class="empty-state">Nenhum produto encontrado</div>';
+                return;
+            }
+
+            grid.innerHTML = products.map(product => renderProductCardHTML(product, data)).join('');
+        }
+
+        function getStoreInfo(link) {
+            if (!link) return null;
+            if (/amazon\.(com\.br|com)/i.test(link)) return { label: '\uD83D\uDFE0 Amazon', bg: '#FF9900', text: '#fff' };
+            if (/shopee\.com\.br/i.test(link) || /shp\.ee/i.test(link)) return { label: '\uD83D\uDD34 Shopee', bg: '#EE4D2D', text: '#fff' };
+            if (/mercadolivre\.com\.br/i.test(link) || /mercadolibre\.com/i.test(link)) return { label: '\uD83D\uDFE1 Mercado Livre', bg: '#FFE600', text: '#333' };
+            return null;
+        }
+
+        function renderProductCardHTML(product, data) {
+            const catName = (data.categories || []).find(c => c.id == product.categoryId)?.name || 'Geral';
+            const store = getStoreInfo(product.shopeeLink);
+            const storeBadgeHtml = store ? `<span class="store-badge" style="background:${store.bg}; color:${store.text};">${store.label}</span>` : '';
+
+            const hasImg = product.imageUrl && product.imageUrl.startsWith('http');
+            const imgHtml = hasImg
+                ? `<img src="${product.imageUrl}" alt="${product.name}" onerror="this.parentElement.innerHTML='<div style=\'background:var(--primary-light);width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;\'><div style=\'font-size:0.85rem;font-weight:700;color:var(--primary);\'>${store ? store.label : '\uD83D\uDDBC\uFE0F Imagem'}</div><div style=\'font-size:0.75rem;color:#999;text-align:center;padding:0 10px;\'>Clique em \\'Onde Comprar\\' para ver a imagem original</div></div>'">`
+                : `<div style="background:var(--primary-light);width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;"><span style="font-size:2rem;">${product.imageUrl || '\uD83D\uDDBC\uFE0F'}</span></div>`;
+
+            return `
+                <div class="product-card">
+                    <div class="product-image">
+                        ${imgHtml}
+                    </div>
+                    <div class="product-info">
+                        ${storeBadgeHtml}
+                        <div style="font-size: 0.7rem; color: #ff66b2; margin-bottom: 4px; font-weight: 600;">${catName}</div>
+                        <div class="product-name">${product.name}</div>
+                        <div class="card-buttons-wrapper">
+                            <a href="${product.shopeeLink}" target="_blank" class="product-link" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0;">
+                                <svg style="width: 18px; height: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                                Onde Comprar
+                            </a>
+                            ${product.instagramLink ? `
+                            <a href="${product.instagramLink}" target="_blank" class="product-link" style="margin: 0; background-color: transparent; color: var(--primary); border: 1px solid var(--primary); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                                Ver no Instagram
+                            </a>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.onload = async () => {
+            await renderInstagramPosts();
+            await renderProducts();
+            await renderCategories();
+        };
+    </script>
+</body>
+</html>
