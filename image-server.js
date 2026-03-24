@@ -8,13 +8,19 @@
 const http = require('http');
 const https = require('https');
 const url = require('url');
+const { Pool } = require('pg');
+
+// Configuração do Banco de Dados Neon
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_t3zhfRyKP2mk@ep-quiet-butterfly-aec1jg4h-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require',
+});
 
 const PORT = 3737;
 
 // Cabeçalhos CORS para o admin.html poder chamar
 const CORS_HEADERS = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Content-Type': 'application/json',
 };
@@ -330,6 +336,38 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(imageUrl ? 200 : 404, CORS_HEADERS);
         res.end(JSON.stringify({ imageUrl, source, success: !!imageUrl }));
         console.log(`[${new Date().toLocaleTimeString()}] ${source}: ${imageUrl ? '✅ ' + imageUrl.slice(0, 60) + '...' : '❌ não encontrada'}`);
+
+    } else if (parsed.pathname === '/get-site-data') {
+        const key = parsed.query.key || 'favoritos_jul_main';
+        try {
+            const result = await pool.query('SELECT content FROM site_data WHERE key_name = $1', [key]);
+            res.writeHead(200, CORS_HEADERS);
+            res.end(JSON.stringify(result.rows[0]?.content || {}));
+        } catch (error) {
+            console.error('Erro ao buscar dados:', error);
+            res.writeHead(500, CORS_HEADERS);
+            res.end(JSON.stringify({ error: 'Erro ao buscar dados' }));
+        }
+
+    } else if (parsed.pathname === '/save-site-data' && req.method === 'POST') {
+        let body = '';
+        req.on('data', chunk => { body += chunk.toString(); });
+        req.on('end', async () => {
+            try {
+                const { key, data } = JSON.parse(body);
+                await pool.query(
+                    'INSERT INTO site_data (key_name, content, updated_at) VALUES ($1, $2, NOW()) ON CONFLICT (key_name) DO UPDATE SET content = $2, updated_at = NOW()',
+                    [key || 'favoritos_jul_main', JSON.stringify(data)]
+                );
+                res.writeHead(200, CORS_HEADERS);
+                res.end(JSON.stringify({ success: true }));
+            } catch (error) {
+                console.error('Erro ao salvar dados:', error);
+                res.writeHead(500, CORS_HEADERS);
+                res.end(JSON.stringify({ error: 'Erro ao salvar dados' }));
+            }
+        });
+        return; // Retorna para não cair no 404 abaixo (o end é assíncrono)
 
     } else if (parsed.pathname === '/health') {
         res.writeHead(200, CORS_HEADERS);
